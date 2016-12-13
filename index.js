@@ -1,43 +1,20 @@
-const path = require('path');
-const express = require('express');
-const exphbs = require ('express-handlebars');
-const helmet = require ('helmet');
-const app = express();
+/*
+* esversion:6
+*/
+const express = require('./express');
+const http = require('http').Server(express);
 const port = 3000;
 
-app.engine('.hbs', exphbs({
-  defaultLayout: 'main',
-  extname: '.hbs',
-  layoutsDir: path.join(__dirname, 'views/layouts')
-}))
-app.set('view engine', '.hbs')
-app.set('views', path.join(__dirname, 'views'))
+const io = require('socket.io')(http);
 
-app.use(helmet());
-app.use((request, response, next) => {
-  console.log(request.headers)
-  next()
-});
-
-app.use((request, response, next) => {
-  request.chance = Math.random()
-  next()
-});
-
-app.get('/', (request, response) => {
-  response.render('home',{
-    name : 'AutoGarden',
-    chance : request.chance
+io.on('connection', function(socket){
+  console.log('a user connected');
+  socket.on('disconnect', function(){
+    console.log('user disconnected');
   });
-  //throw new Error('oops');
-});
-app.use((err, request, response, next) => {
-  // log the error, for now just console.log
-  console.log(err)
-  response.status(500).send('Something broke!')
 });
 
-app.listen(port,(err) => {
+http.listen(port,(err) => {
   if(err) {
     return console.console.log('something wrong happened',err);
   }
